@@ -1,0 +1,9 @@
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": {
+    "protocolVersion": "2025-06-18",
+    "capabilities": {},
+    "serverInfo": {"name": "swiggy-food-mcp", "version": "1.0.0"}
+  }
+}

@@ -1,0 +1,1480 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#17131C">
+<title>Toing Pro</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+:root{
+  --violet:#7C5CFA; --violet-dark:#5B3DF5; --violet-deep:#4C2FD1; --violet-tint:#EFEAFF;
+  --green:#12B76A; --green-dark:#0E9457; --green-tint:#E4F7EC;
+  --orange:#F97316; --orange-tint:#FFF1E5;
+  --red:#E5484D; --red-tint:#FDECEE;
+  --ink:#1B1424; --ink-2:#5C5470; --ink-3:#8E86A3;
+  --bg:#F6F5FA; --card:#FFFFFF; --line:#ECE9F2; --chip:#F1EFF7;
+  --shadow:0 2px 10px rgba(27,20,36,.06); --shadow-lg:0 12px 40px rgba(27,20,36,.22);
+  --radius:15px;
+}
+[data-theme="dark"]{
+  --ink:#F3F0F8; --ink-2:#B4ABC4; --ink-3:#8A8094;
+  --bg:#16111F; --card:#221B2E; --line:#2E2540; --chip:#2A2138;
+  --violet-tint:#2C2150; --green-tint:#123226; --orange-tint:#3A2410; --red-tint:#3A1518;
+  --shadow:0 2px 10px rgba(0,0,0,.45); --shadow-lg:0 12px 40px rgba(0,0,0,.6);
+}
+*{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+html,body{margin:0; padding:0;}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif; background:#0E0A13; color:var(--ink); overscroll-behavior:none;}
+button{font-family:inherit; cursor:pointer; border:none; background:none; color:inherit;}
+input,textarea,select{font-family:inherit; color:var(--ink);}
+#app{max-width:480px; margin:0 auto; min-height:100vh; min-height:100dvh; background:var(--bg); position:relative; overflow-x:hidden; padding-bottom:calc(86px + env(safe-area-inset-bottom)); box-shadow:0 0 60px rgba(0,0,0,.5);}
+/* ---------- top bar ---------- */
+.topbar{position:sticky; top:0; z-index:40; background:#17131C; color:#fff; padding:calc(10px + env(safe-area-inset-top)) 14px 10px;}
+.topbar-row{display:flex; align-items:center; gap:10px;}
+.topbar .x{font-size:20px; width:34px; height:34px; border-radius:10px; display:flex; align-items:center; justify-content:center;}
+.topbar .x:active{background:rgba(255,255,255,.12);}
+.brand{font-size:19px; font-weight:800; flex:1;}
+.topbar .chev,.topbar .kebab{width:34px; height:34px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:17px; opacity:.95;}
+/* ---------- account strip ---------- */
+.acct-strip{display:flex; align-items:center; gap:10px; padding:10px 14px; background:var(--bg);}
+.logo-sq{width:34px; height:34px; border-radius:10px; background:linear-gradient(135deg,#8B6CFF,#5B3DF5); color:#fff; font-weight:900; font-size:17px; display:flex; align-items:center; justify-content:center; flex:none;}
+.wordmark{font-size:19px; font-weight:900; letter-spacing:.2px;}
+.pro-pill{font-size:9.5px; font-weight:900; letter-spacing:1px; background:var(--violet-tint); color:var(--violet-dark); border-radius:6px; padding:3px 7px; margin-left:7px; vertical-align:2px;}
+[data-theme="dark"] .pro-pill{color:#B9A5FF;}
+.acct-chip{margin-left:auto; display:flex; align-items:center; gap:7px; background:var(--card); border:1px solid var(--line); font-size:12px; font-weight:700; padding:7px 10px; border-radius:999px; box-shadow:var(--shadow);}
+.moon{width:36px; height:36px; border-radius:50%; background:var(--card); display:flex; align-items:center; justify-content:center; font-size:16px; box-shadow:var(--shadow); flex:none;}
+.demo-pill{font-size:8.5px; font-weight:900; letter-spacing:.8px; background:var(--chip); color:var(--ink-3); border-radius:6px; padding:3px 6px;}
+/* ---------- toast ---------- */
+.toast-wrap{position:sticky; top:calc(58px + env(safe-area-inset-top)); z-index:45; padding:0 14px; pointer-events:none;}
+.toast-card{display:flex; align-items:center; gap:11px; background:var(--card); border-radius:13px; padding:12px 14px; box-shadow:var(--shadow-lg); margin-bottom:8px; position:relative; overflow:hidden; animation:toastIn .22s ease;}
+.toast-card::after{content:""; position:absolute; left:0; bottom:0; height:3px; width:100%; background:var(--green); animation:bar 2.6s linear forwards;}
+.toast-card.err::after{background:var(--red);}
+.toast-card.info::after{background:var(--violet);}
+.toast-card.coupon::after{background:var(--green);}
+.toast-ic{width:26px; height:26px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:13px; color:#fff; flex:none; background:var(--green);}
+.toast-card.err .toast-ic{background:var(--red);}
+.toast-card.info .toast-ic{background:var(--violet);}
+.toast-msg{font-size:13px; font-weight:800;}
+@keyframes toastIn{from{opacity:0; transform:translateY(-8px);} to{opacity:1; transform:none;}}
+@keyframes bar{from{width:100%;} to{width:0;}}
+/* ---------- screens ---------- */
+.screen{display:none; padding:6px 14px 22px; animation:fade .16s ease;}
+.screen.active{display:block;}
+@keyframes fade{from{opacity:0; transform:translateY(3px);} to{opacity:1; transform:none;}}
+.overlay{display:none; position:absolute; inset:0; background:var(--bg); z-index:50; overflow-y:auto; padding-bottom:24px; animation:slidein .18s ease;}
+.overlay.active{display:block;}
+@keyframes slidein{from{transform:translateX(16px); opacity:.4;} to{transform:none; opacity:1;}}
+.card{background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow); padding:14px; margin-bottom:11px;}
+.card.tight{padding:0; overflow:hidden;}
+.row{display:flex; align-items:center; gap:11px;}
+.row .grow{flex:1; min-width:0;}
+.muted{color:var(--ink-2); font-size:12px;}
+.tiny{font-size:10.5px; color:var(--ink-3);}
+h2.sec{font-size:14.5px; font-weight:800; margin:14px 2px 9px; display:flex; align-items:center;}
+h2.sec .right{margin-left:auto; font-size:12px; font-weight:700; color:var(--ink-2);}
+.chev{color:var(--ink-3); font-size:18px;}
+.ic{width:38px; height:38px; border-radius:11px; display:flex; align-items:center; justify-content:center; font-size:17px; flex:none;}
+.ic.violet{background:var(--violet-tint);}
+.ic.green{background:var(--green-tint);}
+.ic.orange{background:var(--orange-tint);}
+.ic.red{background:var(--red-tint);}
+/* ---------- buttons ---------- */
+.btn{border-radius:13px; padding:13px 18px; font-size:14px; font-weight:800; text-align:center; background:var(--violet); color:#fff; transition:.15s;}
+.btn:active{transform:scale(.97); filter:brightness(.94);}
+.btn.block{width:100%;}
+.btn.green{background:var(--green);}
+.btn.ghost{background:var(--chip); color:var(--ink);}
+.btn.outline{background:transparent; border:1.5px solid var(--line);}
+.btn.pale-violet{background:var(--violet-tint); color:var(--violet-dark);}
+.btn.pale-green{background:var(--green-tint); color:var(--green-dark);}
+.btn[disabled]{opacity:.55; pointer-events:none;}
+.spin{width:16px; height:16px; border-radius:50%; border:2.5px solid rgba(255,255,255,.35); border-top-color:#fff; animation:sp 1s linear infinite; display:inline-block; vertical-align:-3px;}
+.spin.dark{border-color:var(--line); border-top-color:var(--violet);}
+@keyframes sp{to{transform:rotate(360deg);}}
+/* ---------- cart ---------- */
+.addr-row{border:1px solid var(--line); border-radius:14px; padding:13px 14px; display:flex; gap:11px; align-items:center; background:var(--card); margin-bottom:11px;}
+.addr-row .t{font-weight:800; font-size:13.5px;}
+.addr-row .s{font-size:11px; color:var(--ink-2); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+.rest-row{display:flex; gap:12px; align-items:center; padding:12px 14px; border-bottom:1px dashed var(--line);}
+.rest-thumb{width:50px; height:50px; border-radius:13px; background:linear-gradient(135deg,#FFC36B,#E8622C); display:flex; align-items:center; justify-content:center; font-size:23px; flex:none;}
+.trash{width:34px; height:34px; border-radius:10px; background:var(--red-tint); color:var(--red); display:flex; align-items:center; justify-content:center; font-size:15px;}
+.item-row{display:flex; gap:10px; align-items:center; padding:11px 14px 6px;}
+.veg-mark{width:15px; height:15px; border:1.6px solid var(--green); border-radius:4px; display:inline-flex; align-items:center; justify-content:center; flex:none;}
+.veg-mark::after{content:""; width:7.5px; height:7.5px; border-radius:50%; background:var(--green);}
+.veg-mark.nonveg{border-color:#C0392B;}
+.veg-mark.nonveg::after{background:#C0392B;}
+.stepper{display:flex; align-items:center; border:1px solid var(--green); border-radius:10px; overflow:hidden; background:var(--green-tint);}
+.stepper button{width:32px; height:30px; font-size:16px; font-weight:800; color:var(--green);}
+.stepper .n{width:28px; text-align:center; font-weight:800; font-size:13px; color:var(--green);}
+.cook-link{color:var(--violet); font-weight:800; font-size:12.5px; padding:8px 14px 12px; display:inline-flex; gap:6px; align-items:center;}
+.cook-chip{margin:0 14px 10px; display:inline-flex; gap:7px; align-items:center; background:var(--violet-tint); color:var(--violet-dark); font-size:11px; font-weight:800; padding:6px 10px; border-radius:8px;}
+/* coupon */
+.coupon-row-card{display:flex; align-items:center; gap:11px; border-radius:13px; padding:13px 14px; margin-bottom:11px; font-size:13px; font-weight:800;}
+.coupon-row-card.applied{background:var(--green-tint); color:var(--green-dark);}
+.coupon-row-card.searching{background:var(--card); box-shadow:var(--shadow);}
+.coupon-row-card.viewall{background:var(--card); box-shadow:var(--shadow); color:var(--ink);}
+.change-link{margin-left:auto; color:var(--violet); font-weight:800; font-size:12px;}
+/* bill */
+.bill-row{display:flex; justify-content:space-between; font-size:12.5px; padding:4.5px 0; color:var(--ink-2);}
+.bill-row .amt{font-weight:700; color:var(--ink);}
+.bill-row.green{color:var(--green-dark);} .bill-row.green .amt{color:var(--green-dark);}
+.strike{text-decoration:line-through; color:var(--ink-3); font-weight:600; margin-right:5px;}
+.dotted{border-top:1.5px dashed var(--line); margin:8px 0;}
+.pay-row{display:flex; justify-content:space-between; align-items:center; font-size:15.5px; font-weight:900; padding:3px 0;}
+.fc-btn{display:inline-flex; gap:6px; align-items:center; background:var(--violet); color:#fff; font-size:11px; font-weight:900; padding:7px 11px; border-radius:999px; letter-spacing:.2px;}
+.fc-btn.claimed{background:var(--green);}
+.fc-btn.claiming{background:var(--violet-dark);}
+/* payment */
+.pm{display:flex; gap:11px; align-items:center; border:1.5px solid var(--line); border-radius:13px; padding:12px; margin-top:9px;}
+.pm.sel{border-color:var(--green); background:rgba(18,183,106,.05);}
+.pm.disabled{opacity:.6;}
+.pm .tick{margin-left:auto; width:21px; height:21px; border-radius:50%; background:var(--green); color:#fff; display:flex; align-items:center; justify-content:center; font-size:11px;}
+.pm .circle{margin-left:auto; width:21px; height:21px; border-radius:50%; border:2px solid var(--line);}
+/* paybar */
+.paybar{position:fixed; bottom:calc(74px + env(safe-area-inset-bottom)); left:50%; transform:translateX(-50%); width:100%; max-width:480px; background:var(--card); border-top:1px solid var(--line); padding:11px 14px; display:flex; align-items:center; gap:12px; z-index:30; box-shadow:0 -8px 24px rgba(27,20,36,.08);}
+.paybar .amt{font-size:19px; font-weight:900;}
+.paybar .lab{font-size:10px; font-weight:900; letter-spacing:.6px; color:var(--ink-3);}
+/* mini cart (search) */
+.mini-cart{position:fixed; bottom:calc(74px + env(safe-area-inset-bottom)); left:50%; transform:translateX(-50%); width:calc(100% - 28px); max-width:452px; background:var(--green); color:#fff; border-radius:13px; padding:11px 12px 11px 14px; display:flex; align-items:center; gap:11px; z-index:30; box-shadow:0 10px 26px rgba(18,183,106,.35);}
+.mini-cart .vc{margin-left:auto; background:rgba(255,255,255,.22); border-radius:9px; padding:8px 13px; font-size:12px; font-weight:900;}
+/* ---------- bottom nav ---------- */
+.bottomnav{position:fixed; bottom:0; left:50%; transform:translateX(-50%); width:100%; max-width:480px; z-index:45; background:var(--card); border-top:1px solid var(--line); display:flex; padding:7px 2px calc(7px + env(safe-area-inset-bottom));}
+.navbtn{flex:1; display:flex; flex-direction:column; align-items:center; gap:3px; padding:5px 0; color:var(--ink-3); font-size:9.5px; font-weight:800;}
+.navbtn svg{width:21px; height:21px;}
+.navbtn.active{color:var(--violet);}
+/* ---------- orders ---------- */
+.seg{display:flex; background:var(--chip); border-radius:12px; padding:4px; margin:6px 0 13px;}
+.seg button{flex:1; padding:9px 8px; border-radius:9px; font-size:12px; font-weight:800; color:var(--ink-2); display:flex; gap:6px; align-items:center; justify-content:center;}
+.seg button.on{background:var(--card); color:var(--ink); box-shadow:var(--shadow);}
+.count-badge{background:var(--orange); color:#fff; font-size:9.5px; font-weight:900; border-radius:999px; min-width:17px; height:17px; display:inline-flex; align-items:center; justify-content:center; padding:0 4px;}
+.order-card{border-left:4px solid var(--orange); margin-bottom:11px;}
+.order-icon{width:40px; height:40px; border-radius:11px; background:var(--orange-tint); display:flex; align-items:center; justify-content:center; font-size:18px; flex:none;}
+.status-chip{font-size:9px; font-weight:900; letter-spacing:.6px; padding:5px 9px; border-radius:999px; background:var(--orange-tint); color:var(--orange); display:inline-flex; gap:5px; align-items:center;}
+.status-chip.delivered{background:var(--green-tint); color:var(--green-dark);}
+.item-chip{display:inline-flex; align-items:center; gap:5px; background:var(--chip); border-radius:7px; padding:4px 8px; font-size:10.5px; font-weight:700; margin:0 5px 5px 0;}
+.track-btn{display:inline-flex; gap:5px; align-items:center; background:var(--orange-tint); color:var(--orange); font-size:10.5px; font-weight:900; padding:6px 10px; border-radius:999px;}
+.price-green{color:var(--green); font-weight:900;}
+.ext-link{width:26px; height:26px; border-radius:8px; border:1.5px solid var(--line); display:inline-flex; align-items:center; justify-content:center; font-size:12px; color:var(--ink-2);}
+.empty{text-align:center; padding:46px 20px; color:var(--ink-2);}
+.empty .bub{width:64px; height:64px; border-radius:50%; background:var(--violet-tint); display:flex; align-items:center; justify-content:center; font-size:27px; margin:0 auto 13px;}
+/* order detail */
+.status-hero{text-align:center; padding:22px 0 8px;}
+.status-orb{width:92px; height:92px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:40px; margin:0 auto 12px; background:var(--orange-tint); border:3px solid var(--orange); color:var(--orange);}
+.status-orb.delivered{background:var(--green-tint); border-color:var(--green); color:var(--green);}
+.status-hero h1{font-size:23px; font-weight:900; margin:0 0 8px;}
+.rest-chip{display:inline-flex; gap:7px; align-items:center; background:var(--card); border:1px solid var(--line); border-radius:999px; padding:6px 12px; font-size:11.5px; font-weight:800;}
+.arriving{color:var(--orange); font-weight:800; font-size:12.5px; margin-top:8px;}
+.kv{display:flex; justify-content:space-between; gap:12px; padding:6.5px 0; font-size:12.5px;}
+.kv .k{color:var(--ink-2); flex:none;}
+.kv .v{font-weight:800; text-align:right; display:flex; gap:7px; align-items:center; justify-content:flex-end;}
+.copy-btn{width:24px; height:24px; border-radius:7px; background:var(--chip); display:inline-flex; align-items:center; justify-content:center; font-size:11px;}
+.paid-via{background:var(--green-tint); color:var(--green-dark); font-size:9.5px; font-weight:900; letter-spacing:.5px; padding:4px 9px; border-radius:999px;}
+.backbtn{display:inline-flex; gap:7px; align-items:center; background:var(--card); border:1px solid var(--line); border-radius:11px; padding:9px 13px; font-size:12px; font-weight:800;}
+.item-sum-row{display:flex; gap:10px; align-items:center; padding:8px 0; font-size:12.5px;}
+/* ---------- accounts / address ---------- */
+.seg-lite{display:flex; gap:8px;}
+.seg-lite button{border:1.5px solid var(--line); border-radius:999px; padding:8px 15px; font-size:12px; font-weight:800; color:var(--ink-2); display:flex; gap:6px; align-items:center;}
+.seg-lite button.on{background:var(--violet); border-color:var(--violet); color:#fff;}
+.field label{display:block; font-size:11px; font-weight:800; color:var(--ink-2); margin:11px 0 6px;}
+.field input,.field textarea{width:100%; border:1.5px solid var(--line); border-radius:12px; padding:12px; font-size:13px; background:var(--card); outline:none; resize:none;}
+.field input:focus,.field textarea:focus{border-color:var(--violet);}
+.phoneinput{display:flex; gap:8px;}
+.phoneinput .cc{width:84px; text-align:center; font-weight:800;}
+.saved-acct{display:flex; align-items:center; gap:10px; background:var(--card); border:1.5px solid var(--line); border-radius:13px; padding:11px; margin-top:9px;}
+.avatar{width:38px; height:38px; border-radius:50%; background:var(--violet-tint); color:var(--violet-dark); display:flex; align-items:center; justify-content:center; font-size:15px; font-weight:900; flex:none;}
+.mini-btn{width:33px; height:33px; border-radius:10px; border:1.5px solid var(--line); display:flex; align-items:center; justify-content:center; font-size:13.5px; background:var(--card);}
+.mini-btn.violet{border-color:var(--violet-tint); background:var(--violet-tint); color:var(--violet-dark);}
+.mini-btn.danger{border-color:#F3C1C4; color:var(--red); background:var(--red-tint);}
+.mark-used{display:inline-flex; gap:5px; align-items:center; border:1.5px solid var(--line); border-radius:999px; padding:6px 11px; font-size:10px; font-weight:900; color:var(--ink-2); background:var(--card);}
+.mark-used.on{background:var(--green-tint); border-color:var(--green-tint); color:var(--green-dark);}
+.used-badge{font-size:9px; font-weight:900; letter-spacing:.6px; padding:4px 9px; border-radius:999px; background:var(--green-tint); color:var(--green-dark);}
+.filter-row{display:flex; gap:8px; overflow-x:auto; padding:3px 0 7px; align-items:center;}
+.filter-row::-webkit-scrollbar{display:none;}
+.fchip{display:inline-flex; gap:5px; align-items:center; background:var(--chip); border-radius:999px; padding:8px 13px; font-size:11.5px; font-weight:800; color:var(--ink-2); flex:none;}
+.fchip.on{background:var(--green); color:#fff;}
+.fchip.violet-on{background:var(--violet); color:#fff;}
+.search-input{width:100%; border:1.5px solid var(--line); border-radius:12px; padding:12px 13px; font-size:13px; background:var(--card); outline:none;}
+.addr-card{background:var(--card); border:1.5px solid var(--line); border-radius:13px; padding:13px; margin-bottom:10px;}
+.tag-chip{display:inline-block; background:var(--chip); color:var(--ink-2); font-size:8.5px; font-weight:900; letter-spacing:.7px; padding:4px 8px; border-radius:6px; margin-bottom:7px;}
+.addr-name{font-size:13px; font-weight:900;}
+.addr-body{font-size:11.5px; color:var(--ink-2); line-height:1.55; margin-top:5px;}
+.add-tile{display:flex; align-items:center; gap:11px; background:var(--card); border-radius:13px; padding:13px; margin-bottom:10px; box-shadow:var(--shadow);}
+.add-tile .t{font-weight:800; font-size:13px;}
+.add-tile .s{font-size:10.5px; color:var(--ink-2); margin-top:2px;}
+.pill-btn{margin-left:auto; font-size:11px; font-weight:900; padding:8px 13px; border-radius:999px;}
+.pill-btn.violet{background:var(--violet-tint); color:var(--violet-dark);}
+.pill-btn.green{background:var(--green-tint); color:var(--green-dark);}
+/* search */
+.deliver-to{background:var(--card); border-radius:13px; box-shadow:var(--shadow); padding:12px 14px; display:flex; gap:11px; align-items:center; margin-bottom:11px;}
+.skeleton{background:linear-gradient(90deg,var(--chip) 25%,var(--line) 50%,var(--chip) 75%); background-size:200% 100%; animation:sk 1.2s infinite; border-radius:12px; height:86px; margin-bottom:11px;}
+@keyframes sk{from{background-position:200% 0;} to{background-position:-200% 0;}}
+.rest-result{display:flex; gap:11px; align-items:center; background:var(--card); border-radius:13px; padding:12px; margin-bottom:10px; box-shadow:var(--shadow);}
+.pop-chip{border:1.5px solid var(--line); background:var(--card); border-radius:999px; padding:9px 15px; font-size:12px; font-weight:800; color:var(--ink); flex:none;}
+/* bulk */
+.bulk-target{display:flex; gap:10px; align-items:center; background:var(--card); border:1.5px solid var(--line); border-radius:12px; padding:11px; margin-bottom:9px;}
+.bulk-target.sel{border-color:var(--violet); background:var(--violet-tint);}
+.check{width:21px; height:21px; border-radius:7px; border:2px solid var(--line); display:flex; align-items:center; justify-content:center; font-size:11px; color:#fff; flex:none;}
+.check.on{background:var(--violet); border-color:var(--violet);}
+/* sheets & dialog */
+.scrim{position:fixed; inset:0; background:rgba(12,7,20,.55); z-index:60; display:none;}
+.scrim.active{display:block;}
+.sheet{position:fixed; left:50%; bottom:0; transform:translate(-50%,102%); width:100%; max-width:480px; z-index:70; background:var(--card); border-radius:22px 22px 0 0; max-height:82vh; overflow-y:auto; padding:8px 16px calc(22px + env(safe-area-inset-bottom)); transition:transform .25s cubic-bezier(.2,.8,.25,1);}
+.sheet.open{transform:translate(-50%,0);}
+.sheet .grab{width:42px; height:5px; border-radius:999px; background:var(--line); margin:8px auto 12px;}
+.sheet h3{font-size:15.5px; font-weight:900; margin:2px 0 12px; display:flex; align-items:center;}
+.sheet h3 .x{margin-left:auto; width:31px; height:31px; border-radius:50%; background:var(--chip); display:flex; align-items:center; justify-content:center; font-size:14px;}
+.dialog-wrap{position:fixed; inset:0; z-index:80; display:none; align-items:center; justify-content:center; padding:22px;}
+.dialog-wrap.active{display:flex;}
+.dialog{background:var(--card); border-radius:20px; padding:22px; width:100%; max-width:340px; box-shadow:var(--shadow-lg);}
+.dialog .big-ic{width:50px; height:50px; border-radius:50%; background:var(--violet); color:#fff; display:flex; align-items:center; justify-content:center; font-size:22px; margin:0 auto 11px;}
+.dialog h3{font-size:17px; font-weight:900; text-align:center; margin:0 0 4px;}
+.dialog .sub{text-align:center; font-size:12.5px; color:var(--ink-2); margin-bottom:15px;}
+.dialog .opt{border:1.5px solid var(--line); border-radius:13px; padding:12px; margin-top:9px; display:flex; gap:10px; align-items:center;}
+.dialog .opt.danger{border-color:#F3C1C4; background:var(--red-tint);}
+.dialog .opt .t{font-weight:900; font-size:13px;}
+.dialog .opt.danger .t{color:var(--red);}
+.dialog .opt .s{font-size:10.5px; color:var(--ink-2); margin-top:1px;}
+.map-box{height:170px; border-radius:13px; background:
+  linear-gradient(90deg,var(--line) 1px,transparent 1px) 0 0/28px 28px,
+  linear-gradient(0deg,var(--line) 1px,transparent 1px) 0 0/28px 28px,
+  var(--chip); position:relative; overflow:hidden; margin-bottom:6px;}
+.map-pin{position:absolute; left:50%; top:42%; transform:translate(-50%,-100%); font-size:30px; filter:drop-shadow(0 4px 6px rgba(0,0,0,.3));}
+.link-preview{background:var(--chip); border-radius:11px; padding:11px 12px; font-size:11px; word-break:break-all; color:var(--ink-2);}
+</style>
+</head>
+<body>
+<div id="app">
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <div class="topbar-row">
+      <button class="x" data-act="close-app">✕</button>
+      <div class="brand">Toing Pro</div>
+      <button class="chev" data-act="noop">⌄</button>
+      <button class="kebab" data-act="noop">⋮</button>
+    </div>
+  </div>
+
+  <!-- ACCOUNT STRIP -->
+  <div class="acct-strip">
+    <div class="logo-sq">T</div>
+    <div class="wordmark">Toing<span class="pro-pill">PRO</span></div>
+    <span class="demo-pill">DEMO</span>
+    <button class="acct-chip" data-act="open-switcher">
+      <span>👤</span><span id="topPhone">+91 9759769566</span><span class="chev" style="font-size:12px;">▾</span>
+    </button>
+    <button class="moon" data-act="toggle-theme" id="moonBtn">🌙</button>
+  </div>
+
+  <!-- TOASTS -->
+  <div class="toast-wrap" id="toastWrap"></div>
+
+  <!-- ===================== CART ===================== -->
+  <section class="screen active" id="screen-cart">
+    <div class="addr-row" data-act="open-location" id="cartAddrRow"></div>
+
+    <h2 class="sec">Your Order <span class="right" id="cartMeta">2 items · ₹136</span></h2>
+    <div class="card tight">
+      <div class="rest-row">
+        <div class="rest-thumb">🍛</div>
+        <div class="grow">
+          <div style="font-weight:800;font-size:13.5px;" id="cartRestName">Ranch</div>
+          <div class="muted" id="cartRestSub">Matunga Wada · 35-45 mins</div>
+        </div>
+        <button class="trash" data-act="delete-item">🗑</button>
+      </div>
+      <div class="item-row">
+        <span class="veg-mark"></span>
+        <div class="grow" style="font-weight:700;font-size:13px;" id="cartItemName">Diet Coke</div>
+        <div class="stepper">
+          <button data-act="qty-dec">−</button>
+          <div class="n" id="qtyVal">2</div>
+          <button data-act="qty-inc">+</button>
+        </div>
+        <div style="font-weight:900;font-size:13.5px;width:52px;text-align:right;" id="itemPrice">₹136</div>
+      </div>
+      <div id="cookChipWrap"></div>
+      <button class="cook-link" data-act="open-cook">🍴 Add cooking request</button>
+    </div>
+
+    <div id="couponZone"></div>
+
+    <h2 class="sec">Bill Details</h2>
+    <div class="card">
+      <div class="row" style="margin-bottom:4px;">
+        <div class="grow"></div>
+        <button class="fc-btn" id="fcBtn" data-act="claim-fc">⚡ Claim ₹50 FC</button>
+        <button class="mini-btn" data-act="refresh-bill" style="width:30px;height:30px;">⟳</button>
+      </div>
+      <div id="billRows"></div>
+    </div>
+
+    <h2 class="sec">Payment Method</h2>
+    <div class="card">
+      <div class="pm sel" data-act="pay-method" data-pm="upi">
+        <div class="ic violet">▦</div>
+        <div class="grow">
+          <div style="font-weight:800;font-size:13px;">UPI / QR</div>
+          <div class="tiny">Pay with any payment apps</div>
+        </div>
+        <div class="tick">✓</div>
+      </div>
+      <div class="pm disabled">
+        <div class="ic violet">💵</div>
+        <div class="grow">
+          <div style="font-weight:800;font-size:13px;">Cash on Delivery</div>
+          <div class="tiny" style="color:var(--orange);">Adding soon</div>
+        </div>
+        <div class="circle"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== ORDERS ===================== -->
+  <section class="screen" id="screen-orders">
+    <div class="seg">
+      <button class="on" data-act="orders-tab" data-tab="this">📋 This Account</button>
+      <button data-act="orders-tab" data-tab="hour">⚡ Last 1 Hour <span class="count-badge" id="hourCount">3</span></button>
+    </div>
+    <div id="ordersList"></div>
+  </section>
+
+  <!-- ===================== ACCOUNTS ===================== -->
+  <section class="screen" id="screen-accounts">
+    <div class="card">
+      <div class="row" style="margin-bottom:4px;">
+        <div class="ic violet">👤➕</div>
+        <div class="grow" style="font-weight:800;font-size:14.5px;">Add Account</div>
+        <div class="seg-lite">
+          <button class="on" data-act="add-acct-tab" data-tab="number">📱 Number</button>
+          <button data-act="add-acct-tab" data-tab="json">{ } JSON</button>
+        </div>
+      </div>
+      <div id="addAcctNumber">
+        <div class="field">
+          <label>Mobile Number</label>
+          <div class="phoneinput">
+            <input class="cc" value="🇮🇳 +91" readonly>
+            <input id="acctPhone" placeholder="Enter Mobile Number" inputmode="numeric">
+          </div>
+        </div>
+        <button class="btn block" style="margin-top:13px;" data-act="send-otp">➤ Send OTP</button>
+      </div>
+      <div id="addAcctJson" style="display:none;">
+        <div class="field">
+          <label>session.json paste karo ya file choose karo</label>
+          <textarea id="acctJson" rows="4" placeholder='{"client_id":"...","access_token":"...","refresh_token":"...","expires_at":...}'></textarea>
+        </div>
+        <div class="row" style="margin-top:10px;gap:8px;">
+          <button class="btn ghost" style="flex:1;" data-act="pick-json-file">📄 File</button>
+          <button class="btn green" style="flex:1.4;" data-act="save-json-acct">✓ Save account</button>
+        </div>
+        <input type="file" id="jsonFileInput" accept=".json,application/json" style="display:none;">
+      </div>
+    </div>
+
+    <h2 class="sec">Saved Accounts <span class="right" id="acctCount">6</span></h2>
+    <input class="search-input" id="acctSearch" placeholder="🔍 Search Account...">
+    <div class="filter-row" style="margin-top:10px;">
+      <button class="fchip on" data-act="acct-filter" data-f="all">All</button>
+      <button class="fchip" data-act="acct-filter" data-f="fresh">❄ Fresh</button>
+      <button class="fchip" data-act="acct-filter" data-f="used">↺ Used</button>
+      <button class="mini-btn danger" style="margin-left:auto;" data-act="ask-delete-all">🗑</button>
+    </div>
+    <div id="savedAccts"></div>
+  </section>
+
+  <!-- ===================== SEARCH ===================== -->
+  <section class="screen" id="screen-search">
+    <div class="deliver-to" data-act="open-location">
+      <div class="ic violet">📍</div>
+      <div class="grow">
+        <div class="tiny" style="font-weight:900;letter-spacing:.6px;">DELIVER TO</div>
+        <div style="font-weight:800;font-size:13px;" id="searchAddrTag">Friends and Family</div>
+        <div class="tiny" id="searchAddrLine" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:250px;">Ruparel Regalia, Dr Ambedkar Marg, Indira Nagar, Suvarna ...</div>
+      </div>
+      <div class="chev">⌄</div>
+    </div>
+    <div class="row" style="position:relative;">
+      <input class="search-input" id="restSearch" placeholder="Search for restaurants...">
+      <button class="mini-btn" style="position:absolute;right:8px;top:8px;" data-act="clear-search">✕</button>
+    </div>
+    <div id="restResults" style="margin-top:12px;"></div>
+    <div id="searchEmpty">
+      <div class="empty">
+        <div class="bub">🏪</div>
+        <div style="font-weight:900;font-size:18px;">Search Restaurants</div>
+        <div class="muted" style="margin-top:7px;line-height:1.6;">Type a restaurant name to see its menu<br>and add dishes to your cart</div>
+      </div>
+      <div class="tiny" style="font-weight:900;letter-spacing:1.2px;color:var(--ink-3);margin:2px 2px 10px;">POPULAR RESTAURANTS</div>
+      <div class="filter-row" id="popularRow"></div>
+    </div>
+  </section>
+
+  <!-- ===================== ADDRESS ===================== -->
+  <section class="screen" id="screen-address">
+    <div class="add-tile">
+      <div class="ic violet">🔗</div>
+      <div class="grow">
+        <div class="t">Add by Address Link</div>
+        <div class="s">Get the address link from Swiggy to add</div>
+      </div>
+      <button class="pill-btn violet" data-act="open-add-link">Add +</button>
+    </div>
+    <div class="add-tile">
+      <div class="ic green">📌</div>
+      <div class="grow">
+        <div class="t">Add Manually on Map</div>
+        <div class="s">Search, pin the location &amp; enter details</div>
+      </div>
+      <button class="pill-btn green" data-act="open-add-map">Add +</button>
+    </div>
+
+    <h2 class="sec">🗺 Saved Addresses
+      <button class="change-link" data-act="refresh-addresses" style="margin-left:auto;">⟳ Refresh</button>
+    </h2>
+    <div id="addressList"></div>
+  </section>
+
+  <!-- ===================== BULK ===================== -->
+  <section class="screen" id="screen-bulk">
+    <h2 class="sec">📦 Bulk Order</h2>
+    <div class="card">
+      <div class="muted" style="line-height:1.6;">Ek item select karo, multiple addresses/accounts par ek saath order list banao. Har target ka alag order banega.</div>
+    </div>
+    <div class="card">
+      <div class="row">
+        <span class="veg-mark"></span>
+        <div class="grow" style="font-weight:800;font-size:13px;">Diet Coke</div>
+        <div class="stepper">
+          <button data-act="bulk-dec">−</button>
+          <div class="n" id="bulkQty">1</div>
+          <button data-act="bulk-inc">+</button>
+        </div>
+        <div style="font-weight:900;font-size:13px;width:48px;text-align:right;">₹68</div>
+      </div>
+    </div>
+    <h2 class="sec">Targets <span class="right" id="bulkSelCount">0 selected</span></h2>
+    <div id="bulkTargets"></div>
+    <button class="btn block" data-act="bulk-create">📦 Bulk list banao</button>
+    <div id="bulkList" style="margin-top:12px;"></div>
+  </section>
+
+  <!-- ===================== OVERLAY: ORDER DETAIL ===================== -->
+  <div class="overlay" id="overlay-order">
+    <div style="padding:calc(12px + env(safe-area-inset-top)) 14px 0;">
+      <div class="row" style="margin-bottom:4px;">
+        <button class="backbtn" data-act="close-overlay" data-ov="overlay-order">← Back to Orders</button>
+        <button class="backbtn" data-act="refresh-order" style="margin-left:auto;">⟳ Refresh</button>
+      </div>
+      <div class="status-hero" id="orderHero"></div>
+      <h2 class="sec">🧾 Order Information</h2>
+      <div class="card" id="orderInfoCard"></div>
+      <h2 class="sec">📍 Delivery Address</h2>
+      <div class="card" id="orderAddrCard"></div>
+      <h2 class="sec">🧺 Ordered Items Summary</h2>
+      <div class="card" id="orderItemsCard"></div>
+      <h2 class="sec">🧮 Payment &amp; Bill Summary</h2>
+      <div class="card" id="orderBillCard"></div>
+      <button class="btn green block" data-act="close-overlay" data-ov="overlay-order">← Back to Orders</button>
+    </div>
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <nav class="bottomnav">
+    <button class="navbtn" data-act="tab" data-tab="accounts">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+      Accounts
+    </button>
+    <button class="navbtn" data-act="tab" data-tab="address">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-7-5.4-7-11a7 7 0 1 1 14 0c0 5.6-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>
+      Address
+    </button>
+    <button class="navbtn" data-act="tab" data-tab="search">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+      Search
+    </button>
+    <button class="navbtn active" data-act="tab" data-tab="cart">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="20" r="1.7"/><circle cx="17" cy="20" r="1.7"/><path d="M3 4h2l2.2 11.2a1.5 1.5 0 0 0 1.5 1.2h7.6a1.5 1.5 0 0 0 1.5-1.2L20 8H6"/></svg>
+      Cart
+    </button>
+    <button class="navbtn" data-act="tab" data-tab="orders">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8"/><path d="M12 7v5l3.5 2"/></svg>
+      Orders
+    </button>
+    <button class="navbtn" data-act="tab" data-tab="bulk">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/></svg>
+      Bulk
+    </button>
+  </nav>
+
+  <!-- SHEET: LOCATION -->
+  <div class="sheet" id="sheet-location">
+    <div class="grab"></div>
+    <h3>📍 Select your location <span class="x" data-act="close-sheet">✕</span></h3>
+    <input class="search-input" id="locSearch" placeholder="Search for area, street name...">
+    <div class="add-tile" style="margin-top:12px;" data-act="use-current-loc">
+      <div class="ic violet">🎯</div>
+      <div class="grow">
+        <div class="t">Use current location</div>
+        <div class="s">Using GPS</div>
+      </div>
+      <div class="chev">›</div>
+    </div>
+    <div class="tiny" style="font-weight:900;letter-spacing:1.2px;color:var(--ink-3);margin:12px 2px 2px;">SAVED ADDRESSES</div>
+    <div id="locationList"></div>
+  </div>
+
+  <!-- SHEET: ACCOUNT SWITCHER -->
+  <div class="sheet" id="sheet-switcher">
+    <div class="grab"></div>
+    <h3>👤 Switch account <span class="x" data-act="close-sheet">✕</span></h3>
+    <div id="switcherList"></div>
+  </div>
+
+  <!-- SHEET: COUPONS -->
+  <div class="sheet" id="sheet-coupons">
+    <div class="grab"></div>
+    <h3>🎟 Apply Coupon <span class="x" data-act="close-sheet">✕</span></h3>
+    <div class="row" style="position:relative;">
+      <input class="search-input" id="couponInput" placeholder="Enter coupon code">
+      <button class="mini-btn violet" style="position:absolute;right:8px;top:8px;" data-act="apply-typed-coupon">➜</button>
+    </div>
+    <div class="tiny" style="font-weight:900;letter-spacing:1.2px;color:var(--ink-3);margin:14px 2px 2px;">AVAILABLE COUPONS</div>
+    <div id="couponList"></div>
+  </div>
+
+  <!-- SHEET: COOKING REQUEST -->
+  <div class="sheet" id="sheet-cook">
+    <div class="grab"></div>
+    <h3>🍴 Cooking request <span class="x" data-act="close-sheet">✕</span></h3>
+    <div class="field">
+      <label>Restaurant ke liye instruction</label>
+      <textarea id="cookText" rows="3" placeholder="jaise: kam teekha, extra chatni alag se..."></textarea>
+    </div>
+    <button class="btn block green" style="margin-top:13px;" data-act="save-cook">✓ Save request</button>
+    <button class="btn block ghost" style="margin-top:9px;" data-act="clear-cook">Remove request</button>
+  </div>
+
+  <!-- SHEET: ADD ADDRESS (LINK) -->
+  <div class="sheet" id="sheet-add-link">
+    <div class="grab"></div>
+    <h3>🔗 Add by Address Link <span class="x" data-act="close-sheet">✕</span></h3>
+    <div class="field">
+      <label>Swiggy address link paste karo</label>
+      <input id="addrLinkInput" placeholder="https://www.swiggy.com/address/...">
+    </div>
+    <div class="link-preview" id="addrLinkPreview" style="display:none;"></div>
+    <button class="btn block" style="margin-top:13px;" data-act="save-link-addr">✓ Add address</button>
+    <div class="tiny" style="margin-top:10px;line-height:1.6;">Link se name, phone aur address parse hoke saved addresses me add ho jayega.</div>
+  </div>
+
+  <!-- SHEET: ADD ADDRESS (MAP) -->
+  <div class="sheet" id="sheet-add-map">
+    <div class="grab"></div>
+    <h3>📌 Add Manually on Map <span class="x" data-act="close-sheet">✕</span></h3>
+    <div class="map-box"><div class="map-pin">📍</div></div>
+    <div class="tiny" style="margin-bottom:4px;">Pin ko drag karke location set karo (demo map).</div>
+    <div class="field"><label>Tag</label><input id="mapTag" placeholder="FRIENDS AND FAMILY"></div>
+    <div class="field"><label>Name</label><input id="mapName" placeholder="Receiver ka naam"></div>
+    <div class="field"><label>Phone</label><input id="mapPhone" placeholder="+91 ..."></div>
+    <div class="field"><label>Full address</label><textarea id="mapAddr" rows="3" placeholder="Flat, building, street, area, city, pincode"></textarea></div>
+    <button class="btn block green" style="margin-top:13px;" data-act="save-map-addr">✓ Save address</button>
+  </div>
+
+  <!-- SHEET: OTP / LOGIN -->
+  <div class="sheet" id="sheet-otp">
+    <div class="grab"></div>
+    <h3>🔐 Swiggy OTP login <span class="x" data-act="close-sheet">✕</span></h3>
+    <div class="tiny" style="line-height:1.75;margin-bottom:10px;">
+      1. Neeche "Login URL kholo" dabao — browser me Swiggy login khulega.<br>
+      2. Phone + OTP do. Page localhost par fail hoga — URL bar se poora address copy karo.<br>
+      3. Woh URL neeche paste karo — account save ho jayega.
+    </div>
+    <div class="link-preview" id="otpPhoneLine"></div>
+    <button class="btn block" style="margin-top:12px;" data-act="open-login-url">🌐 Login URL kholo</button>
+    <div class="field">
+      <label>Callback URL paste karo</label>
+      <input id="otpCodeInput" placeholder="http://localhost/callback?code=...">
+    </div>
+    <button class="btn block green" style="margin-top:12px;" data-act="save-otp-acct">✓ Save account</button>
+  </div>
+
+  <!-- SHEET: REVIEW -->
+  <div class="sheet" id="sheet-review">
+    <div class="grab"></div>
+    <h3>🧾 Bill review <span class="x" data-act="close-sheet">✕</span></h3>
+    <div class="tiny" style="margin:-6px 0 10px;line-height:1.6;font-weight:800;">⚠️ COD orders cancel nahi hote — bill theek se review karke hi Confirm dabao.</div>
+    <div class="card" id="reviewBill" style="margin-top:0;"></div>
+    <button class="btn block green" data-act="confirm-order">✓ Review karke Confirm karo</button>
+    <button class="btn block ghost" style="margin-top:9px;" data-act="close-sheet">Cancel</button>
+  </div>
+
+  <!-- DIALOG -->
+  <div class="dialog-wrap" id="dialog-remove">
+    <div class="dialog">
+      <div class="big-ic" id="dialogIc">🗑</div>
+      <h3 id="dialogTitle">Remove account</h3>
+      <div class="sub" id="dialogSub">+91 9031204105</div>
+      <div id="dialogOpts"></div>
+      <button class="btn block ghost" style="margin-top:13px;" data-act="close-dialog">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<script>
+"use strict";
+const tg = (window.Telegram && window.Telegram.WebApp) ? window.Telegram.WebApp : null;
+const Haptic = {
+  tap(){ try{ (tg?.HapticFeedback?.impactOccurred||function(){}).call(null,"light"); }catch(e){} },
+  ok(){ try{ (tg?.HapticFeedback?.notificationOccurred||function(){}).call(null,"success"); }catch(e){} },
+  err(){ try{ (tg?.HapticFeedback?.notificationOccurred||function(){}).call(null,"error"); }catch(e){} },
+};
+if (tg) { try{ tg.expand(); tg.setHeaderColor("#17131C"); }catch(e){} }
+
+const $ = (s) => document.querySelector(s);
+const fmt = (n) => "₹" + (Math.round(n*100)/100).toLocaleString("en-IN",{maximumFractionDigits:2});
+const fmt0 = (n) => "₹" + Math.round(n).toLocaleString("en-IN");
+
+const state = {
+  tab:"cart", theme:"light",
+  qty:2, unit:68, bulkQty:1,
+  coupon:null, couponState:"searching",   // searching | none | applied
+  freeCash:"unclaimed",                    // unclaimed | claiming | claimed
+  cook:"",
+  cartRest:{name:"Ranch", sub:"Matunga Wada · 35-45 mins"},
+  payMethod:"upi",
+  addresses:[
+    {tag:"FRIENDS AND FAMILY", name:"Singh", phone:"+91 9699343890", line:"om shakti sra chs 1 floor room no 100, opp sardar nagar 4, Ruparel Regalia, Dr Ambedkar Marg, Indira Nagar, Suvarna Krida, Mumbai, Maharashtra 400022, India. (Ruparel Regalia)"},
+    {tag:"FRIENDS AND FAMILY", name:"Mojan", phone:"+91 9871426271", line:"5e/54 Nit Faridabad, Block E, New Industrial Twp 5, New Industrial Township, Faridabad, Haryana 121001, India"},
+    {tag:"FRIENDS AND FAMILY", name:"Aditya gundecha", phone:"+91 8425025739", line:"WING A1 FLAT NO.405, GUNDECHA TRILLIUM, OPPOSITE OJAS EYE CARE HOSPITAL, Gundecha Trillium, Thakur Village Road, Siddharth Nagar, Kandivali East, Mumbai, Maharashtra 400101, India"},
+    {tag:"FRIENDS AND FAMILY", name:"Singhb", phone:"+91 9167350551", line:"C2/88 seva samiti nagar, Near cbm high school, Karma Kshetra Society, Flank Road, Sion East, Antop Hill, Mumbai, Maharashtra 400037, India. (Karma Kshetra Society)"},
+    {tag:"FRIENDS AND FAMILY", name:"Singh", phone:"+91 9699343890", line:"om shakti sra chs 1 floor room no 104, opp sardar nagar 4, Ruparel Regalia, Dr Ambedkar Marg, Indira Nagar, Suvarna Krida, Mumbai, Maharashtra 400022, India"},
+    {tag:"FRIENDS AND FAMILY", name:"Umbashiya", phone:"+91 6296591407", line:"Tanveer Tailor Ke Paas, 504, 54-106, Mukarimnagar, Hasanganj, Lucknow, Uttar Pradesh 226007, India, Al Noor Informations"},
+  ],
+  selectedAddress:null,
+  accounts:[
+    {name:"Hello", phone:"+91 9759769566", used:true},
+    {name:"Jobr", phone:"+91 7879296145", used:false},
+    {name:"Ut hj", phone:"+91 8787642720", used:false},
+    {name:"Rahul Kumar", phone:"+91 9325678722", used:false},
+    {name:"Hutzq Fhzhehl", phone:"+91 6369321168", used:false},
+    {name:"Rahul Kumar", phone:"+91 7857907967", used:false},
+  ],
+  activeAccount:0,
+  acctFilter:"all", acctQuery:"",
+  ordersTab:"this",
+  removeAcctIndex:null, dialogMode:null,
+  searchTimer:null,
+  bulkTargets:[], bulkList:[],
+  orders:[
+    {
+      id:"#253209318150822", restaurant:"Ranch", area:"Matunga Wada", accountPhone:"+91 7387778178",
+      ago:"15 min ago", placed:"09/11/26 9:25 PM", status:"OUT FOR DELIVERY", arriving:"Arriving in 8 Mins",
+      partner:"Kareem Hashimi | 08069670937", track:"https://www.swiggy.com/toing/ofotrack/RamvXUqvt29D",
+      items:[{name:"Diet Coke", q:2, veg:true, strike:165.6, paid:86}],
+      addr:0, receiver:"Singh | 9699343890",
+      bill:[["Item Total","₹136"],["Discount Applied (BHIMNEW)","−₹50"],["Delivery Fee (2.9 kms)","₹27 FREE"],["Extra discount for you","−₹50"],["Taxes","₹6.8"]],
+      paid:43
+    },
+    {
+      id:"#253209044125433", restaurant:"Ranch", area:"Matunga Wada", accountPhone:"+91 9229417970",
+      ago:"20 min ago", placed:"09/11/26 9:20 PM", status:"ALMOST READY", arriving:"Arriving in 13 Mins",
+      partner:"Rahul Vishwakarma | 08069670941", track:"https://www.swiggy.com/toing/ofotrack/KamxT7yPq12R",
+      items:[{name:"Diet Coke", q:2, veg:true, strike:165.6, paid:86}],
+      addr:0, receiver:"Singh | 9699343890",
+      bill:[["Item Total","₹136"],["Discount Applied (BHIMNEW)","−₹50"],["Delivery Fee (2.9 kms)","₹27 FREE"],["Extra discount for you","−₹50"],["Taxes","₹6.8"]],
+      paid:43
+    },
+    {
+      id:"#253208935190448", restaurant:"Darbar Restaurant", area:"Chowk", accountPhone:"+91 9406653805",
+      ago:"22 min ago", placed:"09/11/26 9:18 PM", status:"OUT FOR DELIVERY", arriving:"Arriving in 18 Mins",
+      partner:"Umesh | 08045955359", track:"https://www.swiggy.com/toing/ofotrack/JamrW8nQo55B",
+      items:[{name:"Laccha Paratha", q:2, veg:true, strike:60, paid:30.77},{name:"Chicken Korma", q:1, veg:false, note:"Quarter", strike:130, paid:49.24}],
+      addr:5, receiver:"Umbashiya | 6296591407",
+      bill:[["Item Total","₹80.01"],["Delivery Fee","FREE"],["Taxes","₹4"]],
+      paid:37
+    }
+  ],
+  lastHour:3
+};
+
+/* ============ toast ============ */
+function toast(msg, kind){
+  kind = kind || "info";
+  const wrap = $("#toastWrap");
+  const card = document.createElement("div");
+  card.className = "toast-card " + kind;
+  const ic = kind === "err" ? "✕" : kind === "coupon" ? "🎟" : "✓";
+  card.innerHTML = `<div class="toast-ic">${ic}</div><div class="toast-msg"></div>`;
+  card.querySelector(".toast-msg").textContent = msg;
+  wrap.prepend(card);
+  setTimeout(() => card.remove(), 2700);
+  if (kind === "err") Haptic.err(); else Haptic.ok();
+}
+
+/* ============ bill math ============ */
+function bill(){
+  const subtotal = state.unit * state.qty;
+  const couponOff = state.coupon ? 50 : 0;
+  const fcOff = state.freeCash === "claimed" ? 50 : 0;
+  const delivery = (state.coupon || state.freeCash === "claimed") ? 0 : 27;
+  const taxes = (state.coupon || state.freeCash === "claimed") ? 6.8 : 8.15;
+  const toPay = subtotal - couponOff - fcOff + delivery + taxes;
+  return {subtotal, couponOff, fcOff, delivery, taxes, toPay};
+}
+function billHtml(){
+  const b = bill();
+  let h = `<div class="bill-row"><span>Item Total</span><span class="amt">${fmt(b.subtotal)}</span></div>`;
+  if (b.delivery === 0) h += `<div class="bill-row"><span>Delivery Fee &nbsp;<span class="tiny">2.8 kms</span></span><span><span class="strike">₹27</span><span class="amt" style="color:var(--green)">FREE</span></span></div>`;
+  else h += `<div class="bill-row"><span>Delivery Fee &nbsp;<span class="tiny">2.8 kms</span></span><span class="amt">${fmt(b.delivery)}</span></div>`;
+  if (state.freeCash === "claimed") h += `<div class="bill-row green"><span>Free Cash</span><span class="amt">−${fmt(b.fcOff)}</span></div>`;
+  if (state.coupon) h += `<div class="bill-row green"><span>Coupon Discount</span><span class="amt">−${fmt(b.couponOff)}</span></div>`;
+  h += `<div class="bill-row"><span>Government Taxes</span><span class="amt">${fmt(b.taxes)}</span></div>`;
+  h += `<div class="dotted"></div><div class="pay-row"><span>To Pay</span><span>${fmt0(b.toPay)}</span></div>`;
+  return h;
+}
+
+/* ============ renderers ============ */
+function renderCart(){
+  const b = bill();
+  $("#qtyVal").textContent = state.qty;
+  $("#itemPrice").textContent = fmt(b.subtotal);
+  $("#cartMeta").textContent = state.qty + " item" + (state.qty > 1 ? "s" : "") + " · " + fmt(b.subtotal);
+  $("#cartRestName").textContent = state.cartRest.name;
+  $("#cartRestSub").textContent = state.cartRest.sub;
+
+  const row = $("#cartAddrRow");
+  if (state.selectedAddress === null){
+    row.innerHTML = `<div class="ic violet">📍</div><div class="grow"><div class="t">Select Delivery Address</div><div class="s">Prices for Friends and Family. Pick a saved address to order</div></div><div class="chev">›</div>`;
+  } else {
+    const a = state.addresses[state.selectedAddress];
+    const title = a.tag === "FRIENDS AND FAMILY" ? "Friends & Family" : toTitle(a.tag);
+    row.innerHTML = `<div class="ic violet">📍</div><div class="grow"><div class="t">Delivering to ${escapeHtml(title)}</div><div class="s">${escapeHtml(a.line)}</div></div><div class="chev">›</div>`;
+  }
+
+  const cookWrap = $("#cookChipWrap");
+  cookWrap.innerHTML = state.cook ? `<div class="cook-chip">🍳 ${escapeHtml(state.cook)} <button data-act="open-cook" style="text-decoration:underline;">edit</button></div>` : "";
+
+  const zone = $("#couponZone");
+  if (state.couponState === "searching"){
+    zone.innerHTML = `<div class="coupon-row-card searching"><div class="ic violet">🎟</div><div class="grow"><div>Finding the best coupon</div><div class="tiny" style="margin-top:2px;font-weight:600;">Checking offers for this cart</div></div><div class="spin dark"></div></div>`;
+  } else if (state.couponState === "applied"){
+    zone.innerHTML = `<div class="coupon-row-card applied"><div class="ic green">🏷</div><div class="grow">Coupon '<b>${state.coupon}</b>' applied <b>${fmt(50)} off</b></div><button class="change-link" data-act="open-coupons">Change</button></div>`;
+  } else {
+    zone.innerHTML = `<div class="coupon-row-card viewall" data-act="open-coupons"><div class="ic violet">🎟</div><div class="grow"><div>Apply coupon</div><div class="tiny" style="margin-top:2px;font-weight:600;">See offers for this restaurant</div></div><div class="chev">›</div></div>`;
+  }
+
+  const fc = $("#fcBtn");
+  if (state.freeCash === "unclaimed"){ fc.className = "fc-btn"; fc.innerHTML = "⚡ Claim ₹50 FC"; }
+  else if (state.freeCash === "claiming"){ fc.className = "fc-btn claiming"; fc.innerHTML = `<span class="spin"></span> Claiming`; }
+  else { fc.className = "fc-btn claimed"; fc.innerHTML = "✓ Claimed ₹50 FC"; }
+
+  $("#billRows").innerHTML = billHtml();
+  syncBottomBar();
+}
+function toTitle(s){ return s.toLowerCase().replace(/(^|\s)\S/g, c => c.toUpperCase()); }
+function escapeHtml(s){ return s.replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+
+function renderOrders(){
+  const list = $("#ordersList");
+  $("#hourCount").textContent = String(state.lastHour);
+  let orders = state.ordersTab === "hour"
+    ? state.orders
+    : state.orders.filter(o => o.accountPhone === state.accounts[state.activeAccount].phone);
+  if (!orders.length){
+    list.innerHTML = `<div class="empty"><div class="bub">🛍</div>
+      <div style="font-weight:900;font-size:18px;">No Orders Found</div>
+      <div class="muted" style="margin-top:7px;line-height:1.6;">${state.ordersTab === "hour" ? "Orders you place here show up for 60 minutes." : "This account has no orders yet."}</div>
+      <button class="backbtn" style="margin:16px auto 0;display:inline-flex;" data-act="noop">⟳ Refresh</button></div>`;
+    return;
+  }
+  list.innerHTML = orders.map(o => `
+    <div class="card order-card" data-act="open-order" data-id="${o.id}">
+      <div class="row">
+        <div class="order-icon">${o.status === "ALMOST READY" ? "🛍" : "🏍"}</div>
+        <div class="grow">
+          <div style="font-weight:900;font-size:13.5px;">${o.restaurant}</div>
+          <div class="tiny" style="margin-top:2px;">${o.ago} · ${o.accountPhone}</div>
+        </div>
+        <div class="status-chip">● ${o.status}</div>
+      </div>
+      <div style="margin:10px 0 8px;">${o.items.map(i => `<span class="item-chip"><span class="veg-mark ${i.veg ? "" : "nonveg"}"></span>${i.name}${i.q > 1 ? " × " + i.q : ""}</span>`).join("")}</div>
+      <div class="row">
+        <div class="tiny" style="font-weight:700;">${o.id}</div>
+        <div class="row" style="margin-left:auto;gap:8px;">
+          <button class="track-btn" data-act="track" data-id="${o.id}">◎ Track</button>
+          <div class="price-green">${fmt0(o.paid)}</div>
+          <div class="ext-link">↗</div>
+        </div>
+      </div>
+    </div>`).join("");
+}
+
+function renderAccounts(){
+  $("#acctCount").textContent = String(state.accounts.length);
+  const q = state.acctQuery.toLowerCase();
+  const rows = state.accounts.map((a,i) => ({a,i})).filter(({a}) => {
+    if (state.acctFilter === "fresh" && a.used) return false;
+    if (state.acctFilter === "used" && !a.used) return false;
+    return !q || a.name.toLowerCase().includes(q) || a.phone.includes(q);
+  });
+  $("#savedAccts").innerHTML = rows.map(({a,i}) => `
+    <div class="saved-acct">
+      <div class="avatar">${a.name[0].toUpperCase()}</div>
+      <div class="grow">
+        <div style="font-weight:900;font-size:12.5px;">${escapeHtml(a.name)}</div>
+        <div class="tiny">${a.phone}</div>
+      </div>
+      ${a.used ? `<span class="mark-used on">🔒 Used</span>` : `<button class="mark-used" data-act="mark-used" data-i="${i}">🔒 Mark Used</button>`}
+      <button class="mini-btn violet" data-act="export-acct" data-i="${i}">⤓</button>
+      <button class="mini-btn danger" data-act="ask-remove-acct" data-i="${i}">🗑</button>
+    </div>`).join("") || `<div class="empty"><div class="bub">👤</div><div style="font-weight:800;">Koi account nahi mila</div></div>`;
+  const active = state.accounts[state.activeAccount];
+  if (active) $("#topPhone").textContent = active.phone;
+}
+
+function renderAddresses(){
+  $("#addressList").innerHTML = state.addresses.map((a,i) => `
+    <div class="addr-card">
+      <div class="row" style="align-items:flex-start;">
+        <div class="grow">
+          <div class="tag-chip">${escapeHtml(a.tag)}</div>
+          <div class="addr-name">${escapeHtml(a.name)} | ${a.phone}</div>
+          <div class="addr-body">${escapeHtml(a.line)}</div>
+        </div>
+        <button class="trash" data-act="ask-delete-addr" data-i="${i}">🗑</button>
+      </div>
+    </div>`).join("");
+  renderLocationList();
+}
+function renderLocationList(){
+  const q = ($("#locSearch")?.value || "").toLowerCase();
+  const rows = state.addresses.map((a,i) => ({a,i})).filter(({a}) =>
+    !q || a.name.toLowerCase().includes(q) || a.line.toLowerCase().includes(q) || a.tag.toLowerCase().includes(q));
+  $("#locationList").innerHTML = rows.map(({a,i}) => `
+    <div class="addr-card" data-act="select-address" data-i="${i}" style="${state.selectedAddress === i ? "border-color:var(--violet);" : ""}">
+      <div class="row" style="align-items:flex-start;">
+        <div class="ic violet" style="width:32px;height:32px;font-size:14px;">📍</div>
+        <div class="grow">
+          <div class="tag-chip" style="margin-bottom:5px;">${escapeHtml(a.tag)}</div>
+          <div class="addr-name">${escapeHtml(a.name)} | ${a.phone}</div>
+          <div class="addr-body" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escapeHtml(a.line)}</div>
+        </div>
+        ${state.selectedAddress === i ? `<div class="check on">✓</div>` : ""}
+      </div>
+    </div>`).join("");
+}
+
+function renderSwitcher(){
+  $("#switcherList").innerHTML = state.accounts.map((a,i) => `
+    <div class="saved-acct" data-act="switch-acct" data-i="${i}">
+      <div class="avatar">${a.name[0].toUpperCase()}</div>
+      <div class="grow">
+        <div style="font-weight:900;font-size:12.5px;">${escapeHtml(a.name)}</div>
+        <div class="tiny">${a.phone}</div>
+      </div>
+      ${i === state.activeAccount ? `<div class="check on">✓</div>` : `<div class="check"></div>`}
+    </div>`).join("");
+}
+
+function renderCoupons(){
+  const coupons = [
+    ["BHIMNEW","₹50 OFF","Save ₹50 on this order!"],
+    ["TRYNEW","70% OFF","Save ₹140 on this order!"],
+    ["DELULU4FOOD","70% OFF","Save ₹140 on this order!"],
+    ["FLAT125","₹125 OFF","Save ₹125 on this order!"],
+    ["SAMSUNGPAY","₹50 OFF","Save ₹50 using Samsung Pay UPI!"],
+    ["PAYTMUPI","CASHBACK","Flat ₹50 cashback using Paytm UPI!"],
+  ];
+  $("#couponList").innerHTML = coupons.map(([code,label,desc]) => {
+    const on = state.coupon === code;
+    return `<div class="saved-acct" style="${on ? "border-color:var(--green);" : ""}">
+      <div class="ic green">🎟</div>
+      <div class="grow">
+        <div style="font-weight:900;font-size:12.5px;">${code} <span style="color:var(--orange);font-size:10px;">${label}</span></div>
+        <div class="tiny" style="margin-top:2px;">${desc}</div>
+      </div>
+      ${on ? `<div class="check on">✓</div>` : `<button class="pill-btn violet" data-act="apply-coupon" data-code="${code}">APPLY</button>`}
+    </div>`;
+  }).join("");
+}
+
+function renderSearchResults(){
+  const q = ($("#restSearch").value || "").trim();
+  const empty = $("#searchEmpty");
+  const box = $("#restResults");
+  if (!q){
+    empty.style.display = "";
+    box.innerHTML = "";
+    syncBottomBar();
+    return;
+  }
+  empty.style.display = "none";
+  box.innerHTML = `<div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div>`;
+  clearTimeout(state.searchTimer);
+  state.searchTimer = setTimeout(() => {
+    const all = [
+      {name:"Ranch", area:"Matunga Wada", eta:"35-45 mins", rating:"4.2", emoji:"🍛", item:"Diet Coke", price:68},
+      {name:"Darbar Restaurant", area:"Chowk", eta:"40-45 mins", rating:"4.4", emoji:"🍢", item:"Laccha Paratha", price:30},
+      {name:"Relax Corner Pure Veg", area:"Bibwewadi", eta:"30-35 mins", rating:"4.3", emoji:"🥗", item:"Kaju cream Milkshake", price:204},
+    ];
+    const list = all.filter(r => r.name.toLowerCase().includes(q.toLowerCase()) || r.area.toLowerCase().includes(q.toLowerCase()));
+    if (!list.length){
+      box.innerHTML = `<div class="empty"><div class="bub">🍽</div>
+        <div style="font-weight:900;font-size:17px;">No restaurants found</div>
+        <div class="muted" style="margin-top:6px;">Nothing matches "${escapeHtml(q)}" here</div></div>`;
+    } else {
+      box.innerHTML = list.map(r => `
+        <div class="rest-result" data-act="add-from-search" data-name="${r.name}" data-sub="${r.area} · ${r.eta}" data-item="${r.item}" data-price="${r.price}">
+          <div class="rest-thumb">${r.emoji}</div>
+          <div class="grow">
+            <div style="font-weight:900;font-size:13px;">${r.name}</div>
+            <div class="tiny">★ ${r.rating} · ${r.area} · ${r.eta}</div>
+          </div>
+          <button class="pill-btn violet">Add +</button>
+        </div>`).join("");
+    }
+    syncBottomBar();
+  }, 700);
+  syncBottomBar();
+}
+
+function renderBulk(){
+  const targets = [];
+  state.addresses.forEach((a,i) => targets.push({kind:"addr", i, label:a.name + " | " + a.phone, sub:a.line}));
+  $("#bulkTargets").innerHTML = targets.map((t,idx) => `
+    <div class="bulk-target ${state.bulkTargets.includes(idx) ? "sel" : ""}" data-act="bulk-toggle" data-idx="${idx}">
+      <div class="check ${state.bulkTargets.includes(idx) ? "on" : ""}">${state.bulkTargets.includes(idx) ? "✓" : ""}</div>
+      <div class="grow">
+        <div style="font-weight:800;font-size:12px;">${escapeHtml(t.label)}</div>
+        <div class="tiny" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escapeHtml(t.sub)}</div>
+      </div>
+    </div>`).join("");
+  $("#bulkSelCount").textContent = state.bulkTargets.length + " selected";
+  $("#bulkQty").textContent = state.bulkQty;
+  $("#bulkList").innerHTML = state.bulkList.map(b => `
+    <div class="card" style="border-left:4px solid var(--violet);">
+      <div class="row">
+        <div class="ic violet">📦</div>
+        <div class="grow">
+          <div style="font-weight:800;font-size:12px;">${escapeHtml(b.label)}</div>
+          <div class="tiny">Diet Coke × ${b.qty} · ${fmt0(b.qty * 68)}</div>
+        </div>
+        <div class="status-chip ${b.done ? "delivered" : ""}">${b.done ? "✓ DONE" : "● QUEUED"}</div>
+      </div>
+    </div>`).join("");
+}
+
+function renderPopular(){
+  $("#popularRow").innerHTML = ["Domino's","KFC","McDonald's","Pizza Hut","Burger King","Subway","Wow! Momo","Haldiram"]
+    .map(n => `<button class="pop-chip" data-act="popular" data-name="${n}">${n}</button>`).join("");
+}
+
+/* ============ bottom bar (paybar / mini-cart) ============ */
+function syncBottomBar(){
+  document.querySelectorAll(".paybar-wrap,.mini-cart-wrap").forEach(e => e.remove());
+  const wrap = document.createElement("div");
+  if (state.tab === "cart"){
+    wrap.className = "paybar-wrap";
+    const b = bill();
+    wrap.innerHTML = `<div class="paybar">
+      <div><div class="lab">PAY USING UPI</div><div class="amt">${fmt0(b.toPay)}</div></div>
+      ${state.selectedAddress === null
+        ? `<button class="btn green" style="margin-left:auto;min-width:168px;" data-act="open-location">📍 Select Address</button>`
+        : `<button class="btn green" style="margin-left:auto;min-width:168px;" data-act="pay">PAY ${fmt0(b.toPay)}</button>`}
+    </div>`;
+    $("#app").appendChild(wrap);
+  } else if (state.tab === "search" && $("#restSearch").value.trim()){
+    wrap.className = "mini-cart-wrap";
+    wrap.innerHTML = `<div class="mini-cart">
+      <div style="width:34px;height:34px;border-radius:9px;background:rgba(255,255,255,.22);display:flex;align-items:center;justify-content:center;">🛍</div>
+      <div><div style="font-size:11px;font-weight:800;opacity:.85;">${state.qty} items · ${state.cartRest.name}</div>
+      <div style="font-size:15px;font-weight:900;">${fmt0(bill().toPay)}</div></div>
+      <button class="vc" data-act="tab" data-tab="cart">View Cart ›</button>
+    </div>`;
+    $("#app").appendChild(wrap);
+  }
+}
+
+/* ============ sheets / dialog ============ */
+function openSheet(id){ $("#sheet-" + id).classList.add("open"); ensureScrim(true); }
+function closeSheets(){ document.querySelectorAll(".sheet.open").forEach(s => s.classList.remove("open")); ensureScrim(false); }
+function ensureScrim(on){
+  let scrim = $("#scrim");
+  if (!scrim){
+    scrim = document.createElement("div");
+    scrim.id = "scrim"; scrim.className = "scrim";
+    scrim.addEventListener("click", () => { closeSheets(); closeDialog(); });
+    document.body.appendChild(scrim);
+  }
+  scrim.classList.toggle("active", !!on);
+}
+function openDialog(mode, index){
+  state.dialogMode = mode; state.removeAcctIndex = index ?? null;
+  const opts = $("#dialogOpts");
+  if (mode === "remove-acct"){
+    const a = state.accounts[index];
+    $("#dialogTitle").textContent = "Remove account";
+    $("#dialogSub").textContent = a ? a.phone : "";
+    $("#dialogIc").textContent = "🗑";
+    opts.innerHTML = `
+      <div class="opt" data-act="do-remove-acct"><div class="ic violet">👤−</div>
+        <div><div class="t">Remove</div><div class="s">Take it off from database. The Swiggy account stays.</div></div></div>
+      <div class="opt danger" data-act="do-delete-acct"><div class="ic red">👤✕</div>
+        <div><div class="t">Delete (OTP needed)</div><div class="s">Permanently delete the Swiggy account and remove it everywhere.</div></div></div>`;
+  } else if (mode === "delete-all"){
+    $("#dialogTitle").textContent = "Delete all accounts?";
+    $("#dialogSub").textContent = state.accounts.length + " accounts app se remove ho jayengi";
+    $("#dialogIc").textContent = "🗑";
+    opts.innerHTML = `
+      <div class="opt danger" data-act="do-delete-all"><div class="ic red">🗑</div>
+        <div><div class="t">Haan, sab hatao</div><div class="s">Swiggy accounts safe rahenge — sirf app se list hatengi.</div></div></div>`;
+  } else if (mode === "delete-addr"){
+    const a = state.addresses[index];
+    $("#dialogTitle").textContent = "Remove address?";
+    $("#dialogSub").textContent = a ? a.name + " | " + a.phone : "";
+    $("#dialogIc").textContent = "📍";
+    opts.innerHTML = `
+      <div class="opt danger" data-act="do-delete-addr"><div class="ic red">🗑</div>
+        <div><div class="t">Remove</div><div class="s">Sirf is app se hatega.</div></div></div>`;
+  }
+  $("#dialog-remove").classList.add("active");
+  ensureScrim(true);
+}
+function closeDialog(){ $("#dialog-remove").classList.remove("active"); ensureScrim(false); }
+
+/* ============ navigation ============ */
+function showTab(tab){
+  state.tab = tab;
+  document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+  $("#screen-" + tab).classList.add("active");
+  document.querySelectorAll(".navbtn").forEach(b => b.classList.toggle("active", b.dataset.tab === tab));
+  syncBottomBar();
+  Haptic.tap();
+}
+function openOverlay(id){ $("#" + id).classList.add("active"); syncBottomBar(); }
+function closeOverlay(id){ $("#" + id).classList.remove("active"); syncBottomBar(); }
+
+/* ============ events ============ */
+document.addEventListener("click", (event) => {
+  const el = event.target.closest("[data-act]");
+  if (!el) return;
+  const act = el.dataset.act;
+
+  if (act === "noop"){ Haptic.tap(); return; }
+  if (act === "tab"){ showTab(el.dataset.tab); return; }
+  if (act === "toggle-theme"){
+    state.theme = state.theme === "light" ? "dark" : "light";
+    document.documentElement.dataset.theme = state.theme;
+    $("#moonBtn").textContent = state.theme === "light" ? "🌙" : "☀️";
+    try{ tg?.setHeaderColor(state.theme === "light" ? "#17131C" : "#16111F"); }catch(e){}
+    Haptic.tap(); return;
+  }
+  if (act === "close-app"){
+    if (tg){ try{ tg.close(); return; }catch(e){} }
+    toast("Mini app band — Telegram me bot se khulega."); return;
+  }
+
+  /* ---- cart ---- */
+  if (act === "qty-dec"){
+    if (state.qty > 1){ state.qty--; renderCart(); }
+    else toast("1 se 20 ke beech qty rakho.", "err");
+    return;
+  }
+  if (act === "qty-inc"){
+    if (state.qty < 20){ state.qty++; renderCart(); }
+    else toast("1 se 20 ke beech qty rakho.", "err");
+    return;
+  }
+  if (act === "delete-item"){ state.qty = 1; renderCart(); toast("Item remove ho gaya (demo).", "info"); return; }
+  if (act === "open-cook"){
+    $("#cookText").value = state.cook;
+    openSheet("cook"); Haptic.tap(); return;
+  }
+  if (act === "save-cook"){
+    state.cook = $("#cookText").value.trim();
+    renderCart(); closeSheets();
+    toast("Cooking request save ho gayi ✅", "success");
+    return;
+  }
+  if (act === "clear-cook"){
+    state.cook = ""; renderCart(); closeSheets();
+    toast("Cooking request hat gayi.", "info");
+    return;
+  }
+  if (act === "open-coupons"){ renderCoupons(); openSheet("coupons"); Haptic.tap(); return; }
+  if (act === "apply-coupon"){
+    state.coupon = el.dataset.code;
+    state.couponState = "applied";
+    renderCart(); renderCoupons(); closeSheets();
+    toast(el.dataset.code + " applied · ₹50 off", "coupon");
+    return;
+  }
+  if (act === "apply-typed-coupon"){
+    const code = $("#couponInput").value.trim().toUpperCase();
+    if (!code){ toast("Coupon code likho.", "err"); return; }
+    state.coupon = code; state.couponState = "applied";
+    renderCart(); renderCoupons(); closeSheets();
+    toast(code + " applied · ₹50 off", "coupon");
+    return;
+  }
+  if (act === "claim-fc"){
+    if (state.freeCash !== "unclaimed") return;
+    state.freeCash = "claiming"; renderCart();
+    setTimeout(() => {
+      state.freeCash = "claimed";
+      renderCart();
+      toast("₹50 Free Cash claimed ✅ bill me lag gaya.", "success");
+    }, 1200);
+    return;
+  }
+  if (act === "refresh-bill"){ renderCart(); toast("Bill update ho gaya.", "info"); return; }
+  if (act === "pay-method"){
+    state.payMethod = el.dataset.pm;
+    document.querySelectorAll(".pm").forEach(p => p.classList.remove("sel"));
+    el.classList.add("sel");
+    Haptic.tap(); return;
+  }
+  if (act === "pay"){
+    $("#reviewBill").innerHTML = billHtml();
+    openSheet("review"); Haptic.tap(); return;
+  }
+  if (act === "confirm-order"){
+    const b = bill();
+    const a = state.selectedAddress !== null ? state.addresses[state.selectedAddress] : state.addresses[0];
+    const now = new Date();
+    state.orders.unshift({
+      id:"#" + (253209000000000 + Math.floor(Math.random()*99999999)),
+      restaurant:state.cartRest.name, area:state.cartRest.sub.split(" · ")[0],
+      accountPhone:state.accounts[state.activeAccount].phone,
+      ago:"Just now",
+      placed:"09/11/26 " + now.toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit"}),
+      status:"ALMOST READY", arriving:"Arriving in 35 Mins",
+      partner:"Assigning soon | —", track:"https://www.swiggy.com/toing/ofotrack/" + Math.random().toString(36).slice(2,12),
+      items:[{name:"Diet Coke", q:state.qty, veg:true, strike:Math.round(state.qty*82.8*10)/10, paid:Math.round(state.qty*43)}],
+      addr:state.selectedAddress ?? 0, receiver:a.name + " | " + a.phone.replace("+91 ",""),
+      bill:[["Item Total",fmt(b.subtotal)],["Discount Applied (" + (state.coupon || "BHIMNEW") + ")","−"+fmt(b.couponOff)],
+            ["Delivery Fee (2.8 kms)","₹27 FREE"],["Extra discount for you","−"+fmt(b.fcOff)],["Taxes",fmt(b.taxes)]],
+      paid:Math.round(b.toPay)
+    });
+    state.lastHour++;
+    closeSheets();
+    renderOrders();
+    showTab("orders");
+    toast("Success — demo order place ho gaya.", "success");
+    return;
+  }
+
+  /* ---- orders ---- */
+  if (act === "orders-tab"){
+    state.ordersTab = el.dataset.tab;
+    document.querySelectorAll("[data-act='orders-tab']").forEach(b => b.classList.toggle("on", b === el));
+    renderOrders(); Haptic.tap(); return;
+  }
+  if (act === "track" || act === "copy-track"){
+    const id = el.dataset.id;
+    const o = state.orders.find(x => x.id === id) || state.orders.find(x => x.id === state.orders[0]?.id);
+    const link = o ? o.track : "";
+    if (navigator.clipboard && link) navigator.clipboard.writeText(link).catch(() => {});
+    toast("Tracking link copied", "success");
+    if (act === "track") event.stopPropagation();
+    return;
+  }
+  if (act === "copy-id"){
+    const id = el.dataset.id;
+    if (navigator.clipboard) navigator.clipboard.writeText(id).catch(() => {});
+    toast("Order ID copied", "success");
+    return;
+  }
+  if (act === "open-order"){
+    const o = state.orders.find(x => x.id === el.dataset.id);
+    if (!o) return;
+    const delivered = o.status === "DELIVERED";
+    const ready = o.status === "ALMOST READY";
+    $("#orderHero").innerHTML = `
+      <div class="status-orb ${delivered ? "delivered" : ""}">${delivered ? "✓" : ready ? "🛍" : "🏍"}</div>
+      <h1>${delivered ? "Order Delivered" : ready ? "Almost Ready" : "Out for delivery"}</h1>
+      <div class="rest-chip">🏪 ${o.restaurant} · ${o.area}</div>
+      <div class="arriving">${delivered ? "Delivered" : o.arriving}</div>`;
+    $("#orderInfoCard").innerHTML = `
+      <div class="kv"><span class="k">Order ID</span><span class="v">${o.id} <button class="copy-btn" data-act="copy-id" data-id="${o.id}">⧉</button></span></div>
+      <div class="kv"><span class="k">Paid Via</span><span class="v"><span class="paid-via">UPI</span></span></div>
+      <div class="kv"><span class="k">Placed On</span><span class="v">${o.placed}</span></div>
+      <div class="kv"><span class="k">Tracking</span><span class="v">
+        <button class="track-btn" data-act="track" data-id="${o.id}">◎ Track order</button>
+        <button class="copy-btn" data-act="track" data-id="${o.id}">⧉</button></span></div>
+      <div class="kv"><span class="k">Delivery Partner</span><span class="v">${o.partner}</span></div>`;
+    const addr = state.addresses[o.addr] || state.addresses[0];
+    $("#orderAddrCard").innerHTML = `
+      <div class="tiny">Deliver To:</div>
+      <div style="font-size:12px;font-weight:800;line-height:1.6;margin-top:6px;">${escapeHtml(addr.line)}</div>
+      <div class="row" style="margin-top:11px;"><div class="grow tiny">Receiver Contact:</div><div style="font-size:12px;font-weight:900;">${o.receiver}</div></div>`;
+    $("#orderItemsCard").innerHTML = o.items.map(i => `
+      <div class="item-sum-row">
+        <span class="veg-mark ${i.veg ? "" : "nonveg"}"></span>
+        <div class="grow" style="font-weight:800;">${i.name}${i.note ? `<div class="tiny">${i.note}</div>` : ""}</div>
+        <div class="muted">× ${i.q}</div>
+        <div><span class="strike">${fmt(i.strike)}</span><b>${fmt(i.paid)}</b></div>
+      </div>`).join("");
+    $("#orderBillCard").innerHTML = o.bill.map(([k,v]) => {
+      const green = k.startsWith("Discount") || k.startsWith("Extra") || k.startsWith("Free");
+      return `<div class="bill-row ${green ? "green" : ""}"><span>${k}</span><span class="amt">${v}</span></div>`;
+    }).join("") + `<div class="dotted"></div><div class="pay-row"><span>Total Paid</span><span>${fmt0(o.paid)}</span></div>`;
+    openOverlay("overlay-order"); Haptic.tap();
+    return;
+  }
+  if (act === "refresh-order"){ toast("Status refresh ho gaya.", "info"); return; }
+  if (act === "close-overlay"){ closeOverlay(el.dataset.ov); return; }
+
+  /* ---- accounts ---- */
+  if (act === "add-acct-tab"){
+    const tab = el.dataset.tab;
+    document.querySelectorAll("[data-act='add-acct-tab']").forEach(b => b.classList.toggle("on", b === el));
+    $("#addAcctNumber").style.display = tab === "number" ? "" : "none";
+    $("#addAcctJson").style.display = tab === "json" ? "" : "none";
+    Haptic.tap(); return;
+  }
+  if (act === "send-otp"){
+    const phone = $("#acctPhone").value.trim();
+    $("#otpPhoneLine").textContent = phone ? "Login for: +91 " + phone : "Login ke liye browser me OTP dena hoga";
+    openSheet("otp"); Haptic.tap(); return;
+  }
+  if (act === "open-login-url"){
+    fetch("login_url.json").then(r => r.json()).then(d => {
+      if (d && d.url){
+        window.open(d.url, "_blank");
+        toast("Login URL khul gaya — OTP do, phir callback URL paste karo.", "success");
+      } else {
+        toast("Login URL nahi mila — `python toing.py login` se banao.", "err");
+      }
+    }).catch(() => {
+      toast("Preview me network nahi — login URL chat me diya hai, woh copy karo.", "err");
+    });
+    return;
+  }
+  if (act === "save-otp-acct"){
+    const v = $("#otpCodeInput").value.trim();
+    if (!v){ toast("Callback URL paste karo.", "err"); return; }
+    const phone = $("#acctPhone").value.trim();
+    state.accounts.push({name:"Account " + (state.accounts.length + 1), phone:phone ? "+91 " + phone : "+91 (new login)", used:false});
+    $("#acctPhone").value = ""; $("#otpCodeInput").value = "";
+    renderAccounts(); renderOrders(); closeSheets();
+    toast("Account add ho gaya ✅", "success");
+    return;
+  }
+  if (act === "pick-json-file"){ $("#jsonFileInput").click(); return; }
+  if (act === "save-json-acct"){
+    const raw = $("#acctJson").value.trim();
+    if (!raw){ toast("Pehle session.json paste karo.", "err"); return; }
+    try{
+      const data = JSON.parse(raw);
+      if (!data.access_token || !data.refresh_token || !data.client_id || !data.expires_at) throw new Error("fields");
+      state.accounts.push({name:"Account " + (state.accounts.length + 1), phone:"+91 (session json)", used:false});
+      $("#acctJson").value = "";
+      renderAccounts(); renderOrders(); closeSheets();
+      toast("session.json validate ✅ account save ho gaya.", "success");
+    }catch(e){
+      toast("Ye valid session.json nahi hai — `python toing.py login` se banao.", "err");
+    }
+    return;
+  }
+  if (act === "acct-filter"){
+    state.acctFilter = el.dataset.f;
+    document.querySelectorAll("[data-act='acct-filter']").forEach(b => b.classList.toggle("on", b === el));
+    renderAccounts(); Haptic.tap(); return;
+  }
+  if (act === "mark-used" || act === "switch-acct"){
+    state.activeAccount = parseInt(el.dataset.i, 10);
+    state.accounts.forEach((a,i) => a.used = (i === state.activeAccount));
+    renderAccounts(); renderOrders(); renderSwitcher();
+    if (act === "switch-acct") closeSheets();
+    toast("Active account: " + state.accounts[state.activeAccount].name, "success");
+    return;
+  }
+  if (act === "export-acct"){
+    const a = state.accounts[parseInt(el.dataset.i, 10)];
+    const blob = new Blob([JSON.stringify({
+      client_id:a.client_id || "swiggy-mcp", access_token:a.access_token || "demo-token",
+      refresh_token:a.refresh_token || "demo-refresh", expires_at:a.expires_at || 0
+    }, null, 2)], {type:"application/json"});
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = "session.json";
+    link.click();
+    toast("session.json export ho gaya.", "success");
+    return;
+  }
+  if (act === "ask-remove-acct"){ openDialog("remove-acct", parseInt(el.dataset.i, 10)); return; }
+  if (act === "do-remove-acct"){
+    if (state.removeAcctIndex !== null){
+      state.accounts.splice(state.removeAcctIndex, 1);
+      if (state.activeAccount >= state.accounts.length) state.activeAccount = 0;
+      if (state.accounts[state.activeAccount]) state.accounts[state.activeAccount].used = true;
+      renderAccounts(); renderOrders();
+    }
+    closeDialog();
+    toast("Account remove ho gaya — Swiggy account safe hai.", "success");
+    return;
+  }
+  if (act === "do-delete-acct"){
+    closeDialog();
+    toast("Permanent delete Swiggy app/website se hota hai (OTP ke saath).", "err");
+    return;
+  }
+  if (act === "ask-delete-all"){ openDialog("delete-all"); return; }
+  if (act === "do-delete-all"){
+    state.accounts = [];
+    state.activeAccount = 0;
+    renderAccounts(); renderOrders(); closeDialog();
+    toast("Saare accounts app se hata diye.", "success");
+    return;
+  }
+  if (act === "open-switcher"){ renderSwitcher(); openSheet("switcher"); Haptic.tap(); return; }
+
+  /* ---- search ---- */
+  if (act === "clear-search"){
+    $("#restSearch").value = "";
+    renderSearchResults(); return;
+  }
+  if (act === "popular"){
+    $("#restSearch").value = el.dataset.name;
+    renderSearchResults(); Haptic.tap(); return;
+  }
+  if (act === "add-from-search"){
+    state.cartRest = {name:el.dataset.name, sub:el.dataset.sub};
+    state.unit = parseInt(el.dataset.price, 10) || 68;
+    $("#cartItemName").textContent = el.dataset.item;
+    state.couponState = state.coupon ? "applied" : "searching";
+    renderCart();
+    toast(el.dataset.item + " cart me add ho gaya ✅", "success");
+    setTimeout(() => { if (state.couponState === "searching"){ state.couponState = "none"; renderCart(); } }, 1400);
+    return;
+  }
+
+  /* ---- address ---- */
+  if (act === "open-location"){ renderLocationList(); openSheet("location"); Haptic.tap(); return; }
+  if (act === "use-current-loc"){
+    closeSheets();
+    toast("GPS location use hogi (demo).", "info");
+    return;
+  }
+  if (act === "select-address"){
+    state.selectedAddress = parseInt(el.dataset.i, 10);
+    renderCart(); renderLocationList();
+    $("#searchAddrTag").textContent = state.addresses[state.selectedAddress].tag === "FRIENDS AND FAMILY" ? "Friends and Family" : toTitle(state.addresses[state.selectedAddress].tag);
+    $("#searchAddrLine").textContent = state.addresses[state.selectedAddress].line;
+    closeSheets();
+    toast("Address added to account & selected", "success");
+    return;
+  }
+  if (act === "open-add-link"){ $("#addrLinkInput").value = ""; $("#addrLinkPreview").style.display = "none"; openSheet("add-link"); Haptic.tap(); return; }
+  if (act === "save-link-addr"){
+    const link = $("#addrLinkInput").value.trim();
+    if (!link){ toast("Pehle Swiggy address link paste karo.", "err"); return; }
+    const slug = link.split("/").filter(Boolean).pop() || "new-address";
+    const name = slug.replace(/[-_]/g, " ").replace(/\b\w/g, c => c.toUpperCase()).slice(0, 24) || "New Address";
+    state.addresses.push({tag:"FRIENDS AND FAMILY", name, phone:"+91 (from link)", line:"Address link se import hua: " + link.slice(0, 80)});
+    renderAddresses(); closeSheets();
+    toast("Address added to account & selected", "success");
+    return;
+  }
+  if (act === "open-add-map"){ openSheet("add-map"); Haptic.tap(); return; }
+  if (act === "save-map-addr"){
+    const name = $("#mapName").value.trim();
+    const addr = $("#mapAddr").value.trim();
+    if (!name || !addr){ toast("Name aur full address dono chahiye.", "err"); return; }
+    state.addresses.push({
+      tag:($("#mapTag").value.trim() || "FRIENDS AND FAMILY").toUpperCase(),
+      name, phone:$("#mapPhone").value.trim() || "+91 (map)", line:addr
+    });
+    $("#mapTag").value = ""; $("#mapName").value = ""; $("#mapPhone").value = ""; $("#mapAddr").value = "";
+    renderAddresses(); closeSheets();
+    toast("Address added to account & selected", "success");
+    return;
+  }
+  if (act === "refresh-addresses"){ renderAddresses(); toast("Addresses refresh ho gaye.", "info"); return; }
+  if (act === "ask-delete-addr"){ openDialog("delete-addr", parseInt(el.dataset.i, 10)); return; }
+  if (act === "do-delete-addr"){
+    if (state.removeAcctIndex !== null){
+      state.addresses.splice(state.removeAcctIndex, 1);
+      if (state.selectedAddress !== null && state.selectedAddress >= state.addresses.length) state.selectedAddress = null;
+      renderAddresses(); renderCart();
+    }
+    closeDialog();
+    toast("Address remove ho gaya.", "success");
+    return;
+  }
+
+  /* ---- bulk ---- */
+  if (act === "bulk-dec"){ if (state.bulkQty > 1){ state.bulkQty--; renderBulk(); } return; }
+  if (act === "bulk-inc"){ if (state.bulkQty < 20){ state.bulkQty++; renderBulk(); } return; }
+  if (act === "bulk-toggle"){
+    const idx = parseInt(el.dataset.idx, 10);
+    const at = state.bulkTargets.indexOf(idx);
+    if (at >= 0) state.bulkTargets.splice(at, 1); else state.bulkTargets.push(idx);
+    renderBulk(); Haptic.tap(); return;
+  }
+  if (act === "bulk-create"){
+    if (!state.bulkTargets.length){ toast("Pehle koi target select karo.", "err"); return; }
+    state.bulkList = state.bulkTargets.map(idx => {
+      const t = state.addresses[idx];
+      return {label:t.name + " | " + t.phone, qty:state.bulkQty, done:false};
+    });
+    renderBulk();
+    toast(state.bulkList.length + " bulk orders queue me lag gaye (demo).", "success");
+    setTimeout(() => {
+      state.bulkList.forEach(b => b.done = true);
+      renderBulk();
+    }, 1800);
+    return;
+  }
+
+  /* ---- dialog ---- */
+  if (act === "close-dialog"){ closeDialog(); return; }
+  if (act === "close-sheet"){ closeSheets(); return; }
+});
+
+$("#restSearch").addEventListener("input", renderSearchResults);
+$("#acctSearch").addEventListener("input", (e) => { state.acctQuery = e.target.value; renderAccounts(); });
+$("#locSearch").addEventListener("input", renderLocationList);
+$("#addrLinkInput")?.addEventListener("input", (e) => {
+  const v = e.target.value.trim();
+  const box = $("#addrLinkPreview");
+  if (v){ box.style.display = ""; box.textContent = "🔗 " + v; }
+  else box.style.display = "none";
+});
+$("#jsonFileInput").addEventListener("change", (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => { $("#acctJson").value = reader.result; toast("File load ho gayi — Save account dabao.", "info"); };
+  reader.readAsText(file);
+});
+
+/* ============ boot ============ */
+renderCart();
+renderOrders();
+renderAccounts();
+renderAddresses();
+renderCoupons();
+renderBulk();
+renderPopular();
+renderSearchResults();
+
+/* coupon finder animation */
+setTimeout(() => {
+  if (state.couponState === "searching" && !state.coupon){
+    state.coupon = "BHIMNEW";
+    state.couponState = "applied";
+    renderCart();
+    toast("BHIMNEW applied · ₹50 off", "coupon");
+  }
+}, 1900);
+</script>
+
+<!-- Hosting ke waqt <head> me add karo:
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+-->
+</body>
+</html>

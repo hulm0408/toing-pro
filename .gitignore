@@ -1,0 +1,14 @@
+.env
+session.json
+.login_pending.json
+schema_dump.json
+webapp/login_url.json
+toing.pid.lock
+*.log
+*.log.*
+*.db
+*.db-wal
+*.db-shm
+__pycache__/
+.venv/
+node_modules/
